@@ -32,8 +32,10 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Bump version
+      - name: Bump version and push
         run: |
+          git add .
+          git commit -m "chore: prepare for release" || echo "No changes to commit"
           npm version patch
           git push origin main --follow-tags
 
