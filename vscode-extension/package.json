@@ -1,0 +1,59 @@
+{
+  "name": "beautify-json-log-vscode",
+  "displayName": "Beautify JSON Log",
+  "description": "Preview selected JSON with syntax highlighting in a split panel",
+  "version": "0.0.1",
+  "publisher": "codewaveds",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "beautify-json-log.preview",
+        "title": "Beautify JSON Log: Preview Selection"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "beautify-json-log.preview",
+        "key": "ctrl+shift+/",
+        "mac": "cmd+shift+/",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "test": "jest",
+    "vscode:prepublish": "node esbuild.js"
+  },
+  "dependencies": {
+    "@codewaveds/beautify-json-log": "file:../",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.2",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.8.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "testPathPattern": "src/webview",
+    "moduleNameMapper": {
+      "@codewaveds/beautify-json-log": "<rootDir>/../dist/index.js"
+    }
+  }
+}
