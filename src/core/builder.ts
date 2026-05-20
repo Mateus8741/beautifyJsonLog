@@ -1,12 +1,5 @@
 // src/core/builder.ts
-import {
-  RenderNode,
-  PrimitiveNode,
-  ObjectNode,
-  ArrayNode,
-  CircularNode,
-  SpecialNode,
-} from './types';
+import type { RenderNode, PrimitiveNode } from './types';
 
 export function buildTree(
   value: unknown,
@@ -21,8 +14,8 @@ export function buildTree(
   if (value instanceof Date) return primitive('date', value.toISOString());
   if (value instanceof Error) return primitive('error', `${value.name}: ${value.message}`);
 
-  if (typeof value === 'object') {
-    if (visited.has(value)) return { kind: 'circular' } satisfies CircularNode;
+  if (typeof value === 'object' && value !== null) {
+    if (visited.has(value)) return { kind: 'circular' };
     visited.add(value);
 
     let result: RenderNode;
@@ -32,19 +25,19 @@ export function buildTree(
         key: String(k),
         value: buildTree(v, visited),
       }));
-      result = { kind: 'special', label: `Map(${value.size})`, entries } satisfies SpecialNode;
+      result = { kind: 'special', label: `Map(${value.size})`, entries };
     } else if (value instanceof Set) {
       const items = Array.from(value.values()).map(v => buildTree(v, visited));
-      result = { kind: 'special', label: `Set(${value.size})`, items } satisfies SpecialNode;
+      result = { kind: 'special', label: `Set(${value.size})`, items };
     } else if (Array.isArray(value)) {
       const items = value.map(item => buildTree(item, visited));
-      result = { kind: 'array', items } satisfies ArrayNode;
+      result = { kind: 'array', items };
     } else {
       const entries = Object.entries(value as Record<string, unknown>).map(([k, v]) => ({
         key: k,
         value: buildTree(v, visited),
       }));
-      result = { kind: 'object', entries } satisfies ObjectNode;
+      result = { kind: 'object', entries };
     }
 
     visited.delete(value);
