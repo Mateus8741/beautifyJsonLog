@@ -19,13 +19,19 @@ export function JsonNode({ node, theme, depth, indent }: JsonNodeProps): React.R
 
     case 'array': {
       if (node.items.length === 0) {
-        return <span style={{ color: theme.bracket }}>[]</span>;
+        return (
+          <>
+            <span style={{ color: theme.bracket }}>[</span>
+            <span style={{ color: theme.bracket }}>]</span>
+          </>
+        );
       }
       return (
         <>
           <span style={{ color: theme.bracket }}>[</span>
           <div style={{ paddingLeft: indent }}>
             {node.items.map((item, i) => (
+              // eslint-disable-next-line react/no-array-index-key
               <div key={i}>
                 <JsonNode node={item} theme={theme} depth={depth + 1} indent={indent} />
                 {i < node.items.length - 1 && (
@@ -82,6 +88,7 @@ export function JsonNode({ node, theme, depth, indent }: JsonNodeProps): React.R
             <span style={{ color: theme.bracket }}>(</span>
             <div style={{ paddingLeft: indent }}>
               {items.map((item, i) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <div key={i}>
                   <JsonNode node={item} theme={theme} depth={depth + 1} indent={indent} />
                   {i < items.length - 1 && (
