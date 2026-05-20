@@ -64,48 +64,71 @@ export function JsonNode({ node, theme, depth, indent }: JsonNodeProps): React.R
     }
 
     case 'special': {
-      const isSet = node.items !== undefined;
-      const isEmpty = isSet ? node.items!.length === 0 : node.entries!.length === 0;
-
-      if (isEmpty) {
+      if (node.items !== undefined) {
+        if (node.items.length === 0) {
+          return (
+            <>
+              <span style={{ color: theme.special }}>{node.label}</span>
+              {' '}
+              <span style={{ color: theme.bracket }}>()</span>
+            </>
+          );
+        }
+        const items = node.items;
         return (
           <>
             <span style={{ color: theme.special }}>{node.label}</span>
             {' '}
-            <span style={{ color: theme.bracket }}>()</span>
+            <span style={{ color: theme.bracket }}>(</span>
+            <div style={{ paddingLeft: indent }}>
+              {items.map((item, i) => (
+                <div key={i}>
+                  <JsonNode node={item} theme={theme} depth={depth + 1} indent={indent} />
+                  {i < items.length - 1 && (
+                    <span style={{ color: theme.punctuation }}>,</span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <span style={{ color: theme.bracket }}>)</span>
           </>
         );
       }
 
-      return (
-        <>
-          <span style={{ color: theme.special }}>{node.label}</span>
-          {' '}
-          <span style={{ color: theme.bracket }}>(</span>
-          <div style={{ paddingLeft: indent }}>
-            {isSet
-              ? node.items!.map((item, i) => (
-                  <div key={i}>
-                    <JsonNode node={item} theme={theme} depth={depth + 1} indent={indent} />
-                    {i < node.items!.length - 1 && (
-                      <span style={{ color: theme.punctuation }}>,</span>
-                    )}
-                  </div>
-                ))
-              : node.entries!.map(({ key, value }, i) => (
-                  <div key={key}>
-                    <span style={{ color: theme.key }}>{`"${key}"`}</span>
-                    <span style={{ color: theme.punctuation }}>: </span>
-                    <JsonNode node={value} theme={theme} depth={depth + 1} indent={indent} />
-                    {i < node.entries!.length - 1 && (
-                      <span style={{ color: theme.punctuation }}>,</span>
-                    )}
-                  </div>
-                ))}
-          </div>
-          <span style={{ color: theme.bracket }}>)</span>
-        </>
-      );
+      if (node.entries !== undefined) {
+        if (node.entries.length === 0) {
+          return (
+            <>
+              <span style={{ color: theme.special }}>{node.label}</span>
+              {' '}
+              <span style={{ color: theme.bracket }}>()</span>
+            </>
+          );
+        }
+        const entries = node.entries;
+        return (
+          <>
+            <span style={{ color: theme.special }}>{node.label}</span>
+            {' '}
+            <span style={{ color: theme.bracket }}>(</span>
+            <div style={{ paddingLeft: indent }}>
+              {entries.map(({ key, value }, i) => (
+                <div key={key}>
+                  <span style={{ color: theme.key }}>{`"${key}"`}</span>
+                  <span style={{ color: theme.punctuation }}>: </span>
+                  <JsonNode node={value} theme={theme} depth={depth + 1} indent={indent} />
+                  {i < entries.length - 1 && (
+                    <span style={{ color: theme.punctuation }}>,</span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <span style={{ color: theme.bracket }}>)</span>
+          </>
+        );
+      }
+
+      return <span style={{ color: theme.special }}>{node.label}</span>;
     }
   }
 }
