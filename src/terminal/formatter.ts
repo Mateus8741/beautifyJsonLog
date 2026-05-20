@@ -50,22 +50,24 @@ export function formatTree(
       const label = theme.special(node.label);
 
       if (node.items !== undefined) {
-        if (node.items.length === 0) return `${label} ${theme.bracket('()')}`;
-        const lines = node.items
+        const items = node.items;
+        if (items.length === 0) return `${label} ${theme.bracket('()')}`;
+        const lines = items
           .map((item, i) => {
             const line = `${inner}${formatTree(item, options, depth + 1)}`;
-            return i < node.items!.length - 1 ? line + theme.punctuation(',') : line;
+            return i < items.length - 1 ? line + theme.punctuation(',') : line;
           })
           .join('\n');
         return `${label} ${theme.bracket('(')}\n${lines}\n${pad}${theme.bracket(')')}`;
       }
 
       if (node.entries !== undefined) {
-        if (node.entries.length === 0) return `${label} ${theme.bracket('()')}`;
-        const lines = node.entries
+        const entries = node.entries;
+        if (entries.length === 0) return `${label} ${theme.bracket('()')}`;
+        const lines = entries
           .map(({ key, value }, i) => {
             const line = `${inner}${theme.key(`"${key}"`)}: ${formatTree(value, options, depth + 1)}`;
-            return i < node.entries!.length - 1 ? line + theme.punctuation(',') : line;
+            return i < entries.length - 1 ? line + theme.punctuation(',') : line;
           })
           .join('\n');
         return `${label} ${theme.bracket('(')}\n${lines}\n${pad}${theme.bracket(')')}`;
