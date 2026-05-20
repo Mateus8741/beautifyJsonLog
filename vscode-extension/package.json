@@ -28,6 +28,7 @@
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
     "vscode:prepublish": "node esbuild.js"
   },
   "dependencies": {

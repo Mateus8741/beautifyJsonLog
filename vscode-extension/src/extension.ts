@@ -63,7 +63,7 @@ function buildHtml(
   return fs
     .readFileSync(htmlPath, 'utf8')
     .replace(/\{\{nonce\}\}/g, nonce)
-    .replace('{{webviewScriptUri}}', scriptUri.toString());
+    .replace(/\{\{webviewScriptUri\}\}/g, scriptUri.toString());
 }
 
 function getNonce(): string {
