@@ -16,12 +16,12 @@ export interface PrimitiveNode {
 
 export interface ObjectNode {
   kind: 'object';
-  entries: Array<{ key: string; value: RenderNode }>;
+  entries: ReadonlyArray<{ readonly key: string; readonly value: RenderNode }>;
 }
 
 export interface ArrayNode {
   kind: 'array';
-  items: RenderNode[];
+  items: ReadonlyArray<RenderNode>;
 }
 
 export interface CircularNode {
@@ -31,8 +31,8 @@ export interface CircularNode {
 export interface SpecialNode {
   kind: 'special';
   label: string;
-  entries?: Array<{ key: string; value: RenderNode }>; // Map
-  items?: RenderNode[]; // Set
+  entries?: ReadonlyArray<{ readonly key: string; readonly value: RenderNode }>; // Map
+  items?: ReadonlyArray<RenderNode>; // Set
 }
 
 export type RenderNode =
