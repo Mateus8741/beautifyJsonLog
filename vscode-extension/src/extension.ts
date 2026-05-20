@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { randomBytes } from 'node:crypto';
 
 let panel: vscode.WebviewPanel | undefined;
 
@@ -58,12 +59,7 @@ function buildHtml(
   const scriptUri = webview.asWebviewUri(
     vscode.Uri.file(path.join(context.extensionPath, 'dist', 'webview.js'))
   );
-  const htmlPath = path.join(
-    context.extensionPath,
-    'src',
-    'webview',
-    'webview.html'
-  );
+  const htmlPath = path.join(context.extensionPath, 'dist', 'webview.html');
   return fs
     .readFileSync(htmlPath, 'utf8')
     .replace(/\{\{nonce\}\}/g, nonce)
@@ -71,9 +67,5 @@ function buildHtml(
 }
 
 function getNonce(): string {
-  const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length: 32 }, () =>
-    chars.charAt(Math.floor(Math.random() * chars.length))
-  ).join('');
+  return randomBytes(16).toString('hex');
 }

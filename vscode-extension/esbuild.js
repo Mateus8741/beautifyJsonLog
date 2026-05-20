@@ -1,4 +1,5 @@
 const esbuild = require('esbuild');
+const fs = require('node:fs');
 
 const watch = process.argv.includes('--watch');
 
@@ -35,10 +36,12 @@ async function main() {
   if (watch) {
     await extensionCtx.watch();
     await webviewCtx.watch();
+    fs.copyFileSync('src/webview/webview.html', 'dist/webview.html');
     console.log('Watching...');
   } else {
     await extensionCtx.rebuild();
     await webviewCtx.rebuild();
+    fs.copyFileSync('src/webview/webview.html', 'dist/webview.html');
     await extensionCtx.dispose();
     await webviewCtx.dispose();
     console.log('Build complete.');
