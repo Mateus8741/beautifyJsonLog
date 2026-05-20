@@ -51,7 +51,6 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "jsdom",
-    "testPathPattern": "src/webview",
     "moduleNameMapper": {
       "@codewaveds/beautify-json-log": "<rootDir>/../dist/index.js",
       "^react-dom$": "<rootDir>/node_modules/react-dom",
