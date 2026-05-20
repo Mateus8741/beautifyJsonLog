@@ -1,5 +1,6 @@
 src/**
 node_modules/**
+coverage/**
 esbuild.js
 tsconfig.json
 *.test.*

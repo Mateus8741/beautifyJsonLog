@@ -31,12 +31,10 @@
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "node esbuild.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "@codewaveds/beautify-json-log": "file:../",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  },
-  "devDependencies": {
+    "react-dom": "^19.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20.0.0",
