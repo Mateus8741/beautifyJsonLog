@@ -3,6 +3,7 @@
   "displayName": "Beautify JSON Log",
   "description": "Preview selected JSON with syntax highlighting in a split panel",
   "version": "0.0.1",
+  "license": "MIT",
   "publisher": "codewaveds",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Other"],
