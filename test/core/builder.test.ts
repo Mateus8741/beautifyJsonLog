@@ -2,27 +2,51 @@ import { buildTree } from '../../src/core/builder';
 
 describe('buildTree — primitives', () => {
   test('null', () => {
-    expect(buildTree(null)).toEqual({ kind: 'primitive', valueType: 'null', raw: 'null' });
+    expect(buildTree(null)).toEqual({
+      kind: 'primitive',
+      valueType: 'null',
+      raw: 'null',
+    });
   });
 
   test('undefined', () => {
-    expect(buildTree(undefined)).toEqual({ kind: 'primitive', valueType: 'undefined', raw: 'undefined' });
+    expect(buildTree(undefined)).toEqual({
+      kind: 'primitive',
+      valueType: 'undefined',
+      raw: 'undefined',
+    });
   });
 
   test('string', () => {
-    expect(buildTree('hello')).toEqual({ kind: 'primitive', valueType: 'string', raw: '"hello"' });
+    expect(buildTree('hello')).toEqual({
+      kind: 'primitive',
+      valueType: 'string',
+      raw: '"hello"',
+    });
   });
 
   test('number', () => {
-    expect(buildTree(42)).toEqual({ kind: 'primitive', valueType: 'number', raw: '42' });
+    expect(buildTree(42)).toEqual({
+      kind: 'primitive',
+      valueType: 'number',
+      raw: '42',
+    });
   });
 
   test('boolean true', () => {
-    expect(buildTree(true)).toEqual({ kind: 'primitive', valueType: 'boolean', raw: 'true' });
+    expect(buildTree(true)).toEqual({
+      kind: 'primitive',
+      valueType: 'boolean',
+      raw: 'true',
+    });
   });
 
   test('boolean false', () => {
-    expect(buildTree(false)).toEqual({ kind: 'primitive', valueType: 'boolean', raw: 'false' });
+    expect(buildTree(false)).toEqual({
+      kind: 'primitive',
+      valueType: 'boolean',
+      raw: 'false',
+    });
   });
 
   test('bigint', () => {
@@ -39,6 +63,16 @@ describe('buildTree — primitives', () => {
       kind: 'primitive',
       valueType: 'date',
       raw: '2024-01-01T00:00:00.000Z',
+    });
+  });
+
+  test('invalid Date does not throw and yields Invalid Date', () => {
+    const date = new Date('x');
+    expect(() => buildTree(date)).not.toThrow();
+    expect(buildTree(date)).toEqual({
+      kind: 'primitive',
+      valueType: 'date',
+      raw: 'Invalid Date',
     });
   });
 
@@ -61,8 +95,14 @@ describe('buildTree — objects', () => {
     expect(buildTree({ a: 1, b: 'x' })).toEqual({
       kind: 'object',
       entries: [
-        { key: 'a', value: { kind: 'primitive', valueType: 'number', raw: '1' } },
-        { key: 'b', value: { kind: 'primitive', valueType: 'string', raw: '"x"' } },
+        {
+          key: 'a',
+          value: { kind: 'primitive', valueType: 'number', raw: '1' },
+        },
+        {
+          key: 'b',
+          value: { kind: 'primitive', valueType: 'string', raw: '"x"' },
+        },
       ],
     });
   });
@@ -76,7 +116,10 @@ describe('buildTree — objects', () => {
           value: {
             kind: 'object',
             entries: [
-              { key: 'inner', value: { kind: 'primitive', valueType: 'boolean', raw: 'true' } },
+              {
+                key: 'inner',
+                value: { kind: 'primitive', valueType: 'boolean', raw: 'true' },
+              },
             ],
           },
         },
@@ -90,7 +133,10 @@ describe('buildTree — objects', () => {
     expect(buildTree(obj)).toEqual({
       kind: 'object',
       entries: [
-        { key: 'a', value: { kind: 'primitive', valueType: 'number', raw: '1' } },
+        {
+          key: 'a',
+          value: { kind: 'primitive', valueType: 'number', raw: '1' },
+        },
         { key: 'self', value: { kind: 'circular' } },
       ],
     });
@@ -107,14 +153,24 @@ describe('buildTree — objects', () => {
           key: 'a',
           value: {
             kind: 'object',
-            entries: [{ key: 'x', value: { kind: 'primitive', valueType: 'number', raw: '1' } }],
+            entries: [
+              {
+                key: 'x',
+                value: { kind: 'primitive', valueType: 'number', raw: '1' },
+              },
+            ],
           },
         },
         {
           key: 'b',
           value: {
             kind: 'object',
-            entries: [{ key: 'x', value: { kind: 'primitive', valueType: 'number', raw: '1' } }],
+            entries: [
+              {
+                key: 'x',
+                value: { kind: 'primitive', valueType: 'number', raw: '1' },
+              },
+            ],
           },
         },
       ],
@@ -160,19 +216,77 @@ describe('buildTree — arrays', () => {
 
 describe('buildTree — special types', () => {
   test('Map', () => {
-    const m = new Map<string, number>([['a', 1], ['b', 2]]);
+    const m = new Map<string, number>([
+      ['a', 1],
+      ['b', 2],
+    ]);
     expect(buildTree(m)).toEqual({
       kind: 'special',
       label: 'Map(2)',
       entries: [
-        { key: 'a', value: { kind: 'primitive', valueType: 'number', raw: '1' } },
-        { key: 'b', value: { kind: 'primitive', valueType: 'number', raw: '2' } },
+        {
+          key: 'a',
+          value: { kind: 'primitive', valueType: 'number', raw: '1' },
+        },
+        {
+          key: 'b',
+          value: { kind: 'primitive', valueType: 'number', raw: '2' },
+        },
+      ],
+    });
+  });
+
+  test('Map with object key uses JSON label', () => {
+    const m = new Map<unknown, number>([[{ a: 1 }, 1]]);
+    expect(buildTree(m)).toEqual({
+      kind: 'special',
+      label: 'Map(1)',
+      entries: [
+        {
+          key: '{"a":1}',
+          value: { kind: 'primitive', valueType: 'number', raw: '1' },
+        },
+      ],
+    });
+  });
+
+  test('Map with numeric key', () => {
+    const m = new Map<number, string>([[1, 'x']]);
+    expect(buildTree(m)).toEqual({
+      kind: 'special',
+      label: 'Map(1)',
+      entries: [
+        {
+          key: '1',
+          value: { kind: 'primitive', valueType: 'string', raw: '"x"' },
+        },
+      ],
+    });
+  });
+
+  test('Map with circular object key does not throw', () => {
+    const k: Record<string, unknown> = {};
+    k['self'] = k;
+    const m = new Map<unknown, number>([[k, 1]]);
+    expect(() => buildTree(m)).not.toThrow();
+    expect(buildTree(m)).toEqual({
+      kind: 'special',
+      label: 'Map(1)',
+      entries: [
+        {
+          key: '[Object]',
+          value: { kind: 'primitive', valueType: 'number', raw: '1' },
+        },
       ],
     });
   });
 
   test('empty Map', () => {
-    expect(buildTree(new Map())).toEqual({ kind: 'special', label: 'Map(0)', entries: [] });
+    expect(buildTree(new Map())).toEqual({
+      kind: 'special',
+      label: 'Map(0)',
+      entries: [],
+    });
   });
 
   test('Set', () => {
@@ -189,6 +303,10 @@ describe('buildTree — special types', () => {
   });
 
   test('empty Set', () => {
-    expect(buildTree(new Set())).toEqual({ kind: 'special', label: 'Set(0)', items: [] });
+    expect(buildTree(new Set())).toEqual({
+      kind: 'special',
+      label: 'Set(0)',
+      items: [],
+    });
   });
 });

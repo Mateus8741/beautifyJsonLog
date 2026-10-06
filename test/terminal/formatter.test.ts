@@ -7,12 +7,17 @@ function strip(s: string): string {
 
 describe('formatTree — primitives', () => {
   test('null', () => expect(strip(formatTree(buildTree(null)))).toBe('null'));
-  test('undefined', () => expect(strip(formatTree(buildTree(undefined)))).toBe('undefined'));
-  test('string', () => expect(strip(formatTree(buildTree('hello')))).toBe('"hello"'));
+  test('undefined', () =>
+    expect(strip(formatTree(buildTree(undefined)))).toBe('undefined'));
+  test('string', () =>
+    expect(strip(formatTree(buildTree('hello')))).toBe('"hello"'));
   test('number', () => expect(strip(formatTree(buildTree(42)))).toBe('42'));
-  test('boolean', () => expect(strip(formatTree(buildTree(true)))).toBe('true'));
-  test('bigint', () => expect(strip(formatTree(buildTree(BigInt(1))))).toBe('1n'));
-  test('circular', () => expect(strip(formatTree({ kind: 'circular' }))).toBe('[Circular]'));
+  test('boolean', () =>
+    expect(strip(formatTree(buildTree(true)))).toBe('true'));
+  test('bigint', () =>
+    expect(strip(formatTree(buildTree(BigInt(1))))).toBe('1n'));
+  test('circular', () =>
+    expect(strip(formatTree({ kind: 'circular' }))).toBe('[Circular]'));
 });
 
 describe('formatTree — objects', () => {
@@ -31,7 +36,9 @@ describe('formatTree — objects', () => {
   });
 
   test('respects custom indent', () => {
-    expect(strip(formatTree(buildTree({ a: 1 }), { indent: 4 }))).toBe('{\n    "a": 1\n}');
+    expect(strip(formatTree(buildTree({ a: 1 }), { indent: 4 }))).toBe(
+      '{\n    "a": 1\n}'
+    );
   });
 });
 
@@ -80,11 +87,52 @@ describe('formatTree — ANSI output', () => {
   test('custom theme is applied', () => {
     const noOp = (s: string) => s;
     const theme = {
-      key: noOp, string: noOp, number: noOp, boolean: noOp,
-      null: noOp, undefined: noOp, bigint: noOp, date: noOp,
-      error: noOp, bracket: noOp, punctuation: noOp, circular: noOp, special: noOp,
+      key: noOp,
+      string: noOp,
+      number: noOp,
+      boolean: noOp,
+      null: noOp,
+      undefined: noOp,
+      bigint: noOp,
+      date: noOp,
+      error: noOp,
+      bracket: noOp,
+      punctuation: noOp,
+      circular: noOp,
+      special: noOp,
     };
     const result = formatTree(buildTree({ a: 1 }), { theme });
     expect(result).not.toContain('\x1b[');
+  });
+});
+
+describe('formatTree — key escaping', () => {
+  test('normal keys are unchanged', () => {
+    expect(strip(formatTree(buildTree({ a: 1 })))).toBe('{\n  "a": 1\n}');
+  });
+
+  test('object key with quotes is escaped', () => {
+    expect(strip(formatTree(buildTree({ 'he said "hi"': 1 })))).toBe(
+      '{\n  "he said \\"hi\\"": 1\n}'
+    );
+  });
+
+  test('object key with newline is escaped on a single line', () => {
+    expect(strip(formatTree(buildTree({ 'a\nb': 1 })))).toBe(
+      '{\n  "a\\nb": 1\n}'
+    );
+  });
+
+  test('object key with backslash is escaped', () => {
+    expect(strip(formatTree(buildTree({ 'a\\b': 1 })))).toBe(
+      '{\n  "a\\\\b": 1\n}'
+    );
+  });
+
+  test('Map key with quotes and newline is escaped', () => {
+    const result = strip(
+      formatTree(buildTree(new Map([['he said "hi"\n', 1]])))
+    );
+    expect(result).toBe('Map(1) (\n  "he said \\"hi\\"\\n": 1\n)');
   });
 });

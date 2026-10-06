@@ -1,5 +1,5 @@
 // src/core/builder.ts
-import type { RenderNode, PrimitiveNode } from './types';
+import { RenderNode, PrimitiveNode } from './types';
 
 export function buildTree(
   value: unknown,
@@ -9,10 +9,15 @@ export function buildTree(
   if (value === undefined) return primitive('undefined', 'undefined');
   if (typeof value === 'boolean') return primitive('boolean', String(value));
   if (typeof value === 'number') return primitive('number', String(value));
-  if (typeof value === 'string') return primitive('string', JSON.stringify(value));
+  if (typeof value === 'string')
+    return primitive('string', JSON.stringify(value));
   if (typeof value === 'bigint') return primitive('bigint', `${value}n`);
-  if (value instanceof Date) return primitive('date', value.toISOString());
-  if (value instanceof Error) return primitive('error', `${value.name}: ${value.message}`);
+  if (value instanceof Date) {
+    if (isNaN(value.getTime())) return primitive('date', 'Invalid Date');
+    return primitive('date', value.toISOString());
+  }
+  if (value instanceof Error)
+    return primitive('error', `${value.name}: ${value.message}`);
 
   if (typeof value === 'object' && value !== null) {
     if (visited.has(value)) return { kind: 'circular' };
@@ -22,7 +27,7 @@ export function buildTree(
 
     if (value instanceof Map) {
       const entries = Array.from(value.entries()).map(([k, v]) => ({
-        key: String(k),
+        key: mapKeyLabel(k),
         value: buildTree(v, visited),
       }));
       result = { kind: 'special', label: `Map(${value.size})`, entries };
@@ -33,10 +38,12 @@ export function buildTree(
       const items = value.map(item => buildTree(item, visited));
       result = { kind: 'array', items };
     } else {
-      const entries = Object.entries(value as Record<string, unknown>).map(([k, v]) => ({
-        key: k,
-        value: buildTree(v, visited),
-      }));
+      const entries = Object.entries(value as Record<string, unknown>).map(
+        ([k, v]) => ({
+          key: k,
+          value: buildTree(v, visited),
+        })
+      );
       result = { kind: 'object', entries };
     }
 
@@ -45,6 +52,22 @@ export function buildTree(
   }
 
   return primitive('string', String(value));
+}
+
+function mapKeyLabel(k: unknown): string {
+  if (typeof k === 'string') return k;
+  if (typeof k === 'bigint') return `${k}n`;
+  if (k === null || (typeof k !== 'object' && typeof k !== 'function')) {
+    return String(k);
+  }
+  try {
+    const json = JSON.stringify(k);
+    if (json !== undefined) return json;
+  } catch {
+    // fall through (e.g. circular structures)
+  }
+  const ctorName = (k as { constructor?: { name?: string } }).constructor?.name;
+  return `[${ctorName ?? 'Object'}]`;
 }
 
 function primitive(

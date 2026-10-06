@@ -1,6 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { JsonViewer } from '../../src/react/JsonViewer';
+import * as builder from '../../src/core/builder';
+import { RenderNode } from '../../src/core/types';
 
 describe('<JsonViewer>', () => {
   test('renders a string value', () => {
@@ -31,7 +33,9 @@ describe('<JsonViewer>', () => {
 
   test('omits title element when title is not provided', () => {
     const { container } = render(<JsonViewer value={{ a: 1 }} />);
-    expect(container.querySelector('[data-testid="json-viewer-title"]')).toBeNull();
+    expect(
+      container.querySelector('[data-testid="json-viewer-title"]')
+    ).toBeNull();
   });
 
   test('applies plugin before rendering', () => {
@@ -45,7 +49,14 @@ describe('<JsonViewer>', () => {
               ...node,
               entries: node.entries.map(e =>
                 e.key === 'secret'
-                  ? { key: e.key, value: { kind: 'primitive' as const, valueType: 'string' as const, raw: '"[REDACTED]"' } }
+                  ? {
+                      key: e.key,
+                      value: {
+                        kind: 'primitive' as const,
+                        valueType: 'string' as const,
+                        raw: '"[REDACTED]"',
+                      },
+                    }
                   : e
               ),
             };
@@ -59,10 +70,19 @@ describe('<JsonViewer>', () => {
 
   test('accepts custom CssTheme', () => {
     const customTheme = {
-      key: 'hotpink', string: 'hotpink', number: 'hotpink', boolean: 'hotpink',
-      null: 'hotpink', undefined: 'hotpink', bigint: 'hotpink', date: 'hotpink',
-      error: 'hotpink', bracket: 'hotpink', punctuation: 'hotpink',
-      circular: 'hotpink', special: 'hotpink',
+      key: 'hotpink',
+      string: 'hotpink',
+      number: 'hotpink',
+      boolean: 'hotpink',
+      null: 'hotpink',
+      undefined: 'hotpink',
+      bigint: 'hotpink',
+      date: 'hotpink',
+      error: 'hotpink',
+      bracket: 'hotpink',
+      punctuation: 'hotpink',
+      circular: 'hotpink',
+      special: 'hotpink',
     };
     const { container } = render(<JsonViewer value="x" theme={customTheme} />);
     const span = container.querySelector('span');
@@ -79,5 +99,60 @@ describe('<JsonViewer>', () => {
     render(<JsonViewer value={[]} />);
     expect(screen.getByText('[')).toBeTruthy();
     expect(screen.getByText(']')).toBeTruthy();
+  });
+
+  test('escapes keys containing quotes', () => {
+    render(<JsonViewer value={{ 'a"b': 1 }} />);
+    expect(screen.getByText('"a\\"b"')).toBeTruthy();
+  });
+
+  test('renders Map entries with duplicate key labels without React key warnings', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const one: RenderNode = {
+        kind: 'primitive',
+        valueType: 'number',
+        raw: '1',
+      };
+      const two: RenderNode = {
+        kind: 'primitive',
+        valueType: 'number',
+        raw: '2',
+      };
+      render(
+        <JsonViewer
+          value={null}
+          plugins={[
+            () => ({
+              kind: 'special' as const,
+              label: 'Map(2)',
+              entries: [
+                { key: 'x', value: one },
+                { key: 'x', value: two },
+              ],
+            }),
+          ]}
+        />
+      );
+      expect(screen.getAllByText('"x"')).toHaveLength(2);
+      expect(screen.getByText('1')).toBeTruthy();
+      expect(screen.getByText('2')).toBeTruthy();
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  test('does not rebuild the tree on re-render when plugins prop is omitted', () => {
+    const spy = jest.spyOn(builder, 'buildTree');
+    try {
+      const value = { a: 1 };
+      const { rerender } = render(<JsonViewer value={value} />);
+      rerender(<JsonViewer value={value} />);
+      rerender(<JsonViewer value={value} />);
+      expect(spy).toHaveBeenCalledTimes(1);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
