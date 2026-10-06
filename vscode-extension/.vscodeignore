@@ -1,0 +1,9 @@
+src/**
+node_modules/**
+coverage/**
+esbuild.js
+tsconfig.json
+*.test.*
+**/*.map
+.vscode/launch.json
+.vscode/tasks.json

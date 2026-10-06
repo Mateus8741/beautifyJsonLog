@@ -14,7 +14,11 @@ export function BeautifyJsonLog(
   obj: unknown,
   options: LoggerOptions = {}
 ): void {
-  const { transport = defaultTransport, plugins = [], ...formatOptions } = options;
+  const {
+    transport = defaultTransport,
+    plugins = [],
+    ...formatOptions
+  } = options;
 
   let tree: RenderNode = buildTree(obj);
   for (const plugin of plugins) {

@@ -17,18 +17,13 @@
     "terminal-demo": "tsdx build && node scripts/terminal-demo.js",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "prepare": "husky && tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "deploy": "npm version patch && npm publish --access public"
   },
   "peerDependencies": {
     "react": ">=16"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
   },
   "prettier": {
     "printWidth": 80,
@@ -51,14 +46,14 @@
     "console"
   ],
   "author": "Mateus Tavares",
-  "module": "dist/beautifyjsonlog.esm.js",
+  "module": "dist/beautify-json-log.esm.js",
   "size-limit": [
     {
-      "path": "dist/beautifyjsonlog.cjs.production.min.js",
+      "path": "dist/beautify-json-log.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/beautifyjsonlog.esm.js",
+      "path": "dist/beautify-json-log.esm.js",
       "limit": "10 KB"
     }
   ],

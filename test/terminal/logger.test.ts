@@ -36,7 +36,14 @@ describe('BeautifyJsonLog', () => {
               ...node,
               entries: node.entries.map(e =>
                 e.key === 'secret'
-                  ? { key: e.key, value: { kind: 'primitive' as const, valueType: 'string' as const, raw: '"[REDACTED]"' } }
+                  ? {
+                      key: e.key,
+                      value: {
+                        kind: 'primitive' as const,
+                        valueType: 'string' as const,
+                        raw: '"[REDACTED]"',
+                      },
+                    }
                   : e
               ),
             };
@@ -51,20 +58,25 @@ describe('BeautifyJsonLog', () => {
 
   test('plugins receive the root RenderNode', () => {
     const received: string[] = [];
-    BeautifyJsonLog(
-      'Test',
-      [1, 2],
-      {
-        transport: () => {},
-        plugins: [node => { received.push(node.kind); return node; }],
-      }
-    );
+    BeautifyJsonLog('Test', [1, 2], {
+      transport: () => {},
+      plugins: [
+        node => {
+          received.push(node.kind);
+          return node;
+        },
+      ],
+    });
     expect(received).toEqual(['array']);
   });
 
   test('custom indent is respected', () => {
     const outputs: string[] = [];
-    BeautifyJsonLog('Test', { a: 1 }, { transport: s => outputs.push(s), indent: 4 });
+    BeautifyJsonLog(
+      'Test',
+      { a: 1 },
+      { transport: s => outputs.push(s), indent: 4 }
+    );
     expect(strip(outputs[0]!)).toContain('    "a"');
   });
 });

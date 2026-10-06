@@ -5,6 +5,8 @@ import { buildTree } from '../core/builder';
 import { JsonNode } from './JsonNode';
 import { defaultCssTheme } from './css-theme';
 
+const NO_PLUGINS: Plugin[] = [];
+
 export interface JsonViewerProps {
   value: unknown;
   title?: string;
@@ -19,7 +21,7 @@ export function JsonViewer({
   title,
   theme = defaultCssTheme,
   indent = 16,
-  plugins = [],
+  plugins = NO_PLUGINS,
   style,
 }: JsonViewerProps): React.ReactElement {
   const tree = React.useMemo(() => {
@@ -33,7 +35,10 @@ export function JsonViewer({
   return (
     <div style={{ fontFamily: 'monospace', fontSize: 14, ...style }}>
       {title !== undefined && (
-        <div data-testid="json-viewer-title" style={{ fontWeight: 'bold', marginBottom: 4 }}>
+        <div
+          data-testid="json-viewer-title"
+          style={{ fontWeight: 'bold', marginBottom: 4 }}
+        >
           {title}
         </div>
       )}

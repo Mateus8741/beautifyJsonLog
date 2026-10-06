@@ -29,7 +29,9 @@ export function formatTree(
       const items = node.items
         .map((item, i) => {
           const line = `${inner}${formatTree(item, options, depth + 1)}`;
-          return i < node.items.length - 1 ? line + theme.punctuation(',') : line;
+          return i < node.items.length - 1
+            ? line + theme.punctuation(',')
+            : line;
         })
         .join('\n');
       return `${theme.bracket('[')}\n${items}\n${pad}${theme.bracket(']')}`;
@@ -39,8 +41,14 @@ export function formatTree(
       if (node.entries.length === 0) return theme.bracket('{}');
       const entries = node.entries
         .map(({ key, value }, i) => {
-          const line = `${inner}${theme.key(`"${key}"`)}: ${formatTree(value, options, depth + 1)}`;
-          return i < node.entries.length - 1 ? line + theme.punctuation(',') : line;
+          const line = `${inner}${theme.key(JSON.stringify(key))}: ${formatTree(
+            value,
+            options,
+            depth + 1
+          )}`;
+          return i < node.entries.length - 1
+            ? line + theme.punctuation(',')
+            : line;
         })
         .join('\n');
       return `${theme.bracket('{')}\n${entries}\n${pad}${theme.bracket('}')}`;
@@ -58,7 +66,9 @@ export function formatTree(
             return i < items.length - 1 ? line + theme.punctuation(',') : line;
           })
           .join('\n');
-        return `${label} ${theme.bracket('(')}\n${lines}\n${pad}${theme.bracket(')')}`;
+        return `${label} ${theme.bracket('(')}\n${lines}\n${pad}${theme.bracket(
+          ')'
+        )}`;
       }
 
       if (node.entries !== undefined) {
@@ -66,11 +76,17 @@ export function formatTree(
         if (entries.length === 0) return `${label} ${theme.bracket('()')}`;
         const lines = entries
           .map(({ key, value }, i) => {
-            const line = `${inner}${theme.key(`"${key}"`)}: ${formatTree(value, options, depth + 1)}`;
-            return i < entries.length - 1 ? line + theme.punctuation(',') : line;
+            const line = `${inner}${theme.key(
+              JSON.stringify(key)
+            )}: ${formatTree(value, options, depth + 1)}`;
+            return i < entries.length - 1
+              ? line + theme.punctuation(',')
+              : line;
           })
           .join('\n');
-        return `${label} ${theme.bracket('(')}\n${lines}\n${pad}${theme.bracket(')')}`;
+        return `${label} ${theme.bracket('(')}\n${lines}\n${pad}${theme.bracket(
+          ')'
+        )}`;
       }
 
       return label;
