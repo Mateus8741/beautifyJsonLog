@@ -1,5 +1,5 @@
 // src/react/css-theme.ts
-import { CssTheme } from '../core/types';
+import type { CssTheme } from '../core/types';
 
 export const defaultCssTheme: CssTheme = {
   key: '#7ec699',

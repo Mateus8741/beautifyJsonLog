@@ -1,5 +1,5 @@
 // src/core/builder.ts
-import { RenderNode, PrimitiveNode } from './types';
+import type { RenderNode, PrimitiveNode } from './types';
 
 export function buildTree(
   value: unknown,
@@ -32,10 +32,12 @@ export function buildTree(
       }));
       result = { kind: 'special', label: `Map(${value.size})`, entries };
     } else if (value instanceof Set) {
-      const items = Array.from(value.values()).map(v => buildTree(v, visited));
+      const items = Array.from(value.values()).map((v) =>
+        buildTree(v, visited)
+      );
       result = { kind: 'special', label: `Set(${value.size})`, items };
     } else if (Array.isArray(value)) {
-      const items = value.map(item => buildTree(item, visited));
+      const items = value.map((item) => buildTree(item, visited));
       result = { kind: 'array', items };
     } else {
       const entries = Object.entries(value as Record<string, unknown>).map(

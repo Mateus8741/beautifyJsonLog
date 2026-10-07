@@ -1,1 +1,1 @@
-npx tsdx lint src test
+npm run lint && npm run typecheck && npm test

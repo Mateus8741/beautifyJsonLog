@@ -1,9 +1,9 @@
 /**
- * Rode na raiz: yarn terminal-demo
+ * Rode na raiz: npm run terminal-demo
  * Imprime um JSON formatado colorido no terminal (stdout).
  */
 
-const { BeautifyJsonLog } = require('../dist/index.js');
+const { BeautifyJsonLog } = require('../dist/terminal/index.js');
 
 const sampleData = {
   name: 'Alice',

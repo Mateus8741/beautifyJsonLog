@@ -36,11 +36,7 @@ export interface SpecialNode {
 }
 
 export type RenderNode =
-  | PrimitiveNode
-  | ObjectNode
-  | ArrayNode
-  | CircularNode
-  | SpecialNode;
+  PrimitiveNode | ObjectNode | ArrayNode | CircularNode | SpecialNode;
 
 export type ThemeKey =
   | 'key'

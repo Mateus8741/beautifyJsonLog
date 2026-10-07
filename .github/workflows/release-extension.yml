@@ -1,0 +1,103 @@
+name: Release (VS Code extension)
+
+# Publishes the extension in vscode-extension/ to the VS Code Marketplace
+# (secret VSCE_PAT) and to Open VSX, used by Cursor/VSCodium (secret OVSX_PAT).
+# Each registry is skipped when its secret is not configured.
+# See .github/RELEASING.md.
+
+on:
+  push:
+    tags:
+      - 'vscode-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write # create the GitHub Release
+
+concurrency:
+  group: release-extension
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish extension
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vscode-extension
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Read extension version
+        id: ext
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          name="$(node -p "require('./package.json').name")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "vsix=$name-$version.vsix" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches extension version
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ steps.ext.outputs.version }}
+        run: |
+          if [ "$TAG" != "vscode-v$VERSION" ]; then
+            echo "::error::Tag $TAG does not match vscode-extension/package.json version vscode-v$VERSION"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Package .vsix
+        run: |
+          npm run package
+          test -f "${{ steps.ext.outputs.vsix }}"
+
+      - name: Upload .vsix
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.ext.outputs.vsix }}
+          path: vscode-extension/${{ steps.ext.outputs.vsix }}
+          if-no-files-found: error
+
+      - name: Publish to VS Code Marketplace
+        if: env.VSCE_PAT != ''
+        run: npx --yes @vscode/vsce publish --no-dependencies --packagePath "${{ steps.ext.outputs.vsix }}"
+
+      - name: Skip VS Code Marketplace (no VSCE_PAT)
+        if: env.VSCE_PAT == ''
+        run: echo "::notice::VSCE_PAT secret not set, skipping VS Code Marketplace publish"
+
+      - name: Publish to Open VSX
+        if: env.OVSX_PAT != ''
+        run: npx --yes ovsx publish "${{ steps.ext.outputs.vsix }}"
+
+      - name: Skip Open VSX (no OVSX_PAT)
+        if: env.OVSX_PAT == ''
+        run: echo "::notice::OVSX_PAT secret not set, skipping Open VSX publish"
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: VS Code extension ${{ steps.ext.outputs.version }}
+          generate_release_notes: true
+          files: vscode-extension/${{ steps.ext.outputs.vsix }}

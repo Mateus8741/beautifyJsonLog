@@ -1,6 +1,6 @@
 // src/react/JsonViewer.tsx
 import React from 'react';
-import { RenderNode, Plugin, CssTheme } from '../core/types';
+import type { RenderNode, Plugin, CssTheme } from '../core/types';
 import { buildTree } from '../core/builder';
 import { JsonNode } from './JsonNode';
 import { defaultCssTheme } from './css-theme';

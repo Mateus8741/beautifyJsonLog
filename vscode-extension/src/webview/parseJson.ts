@@ -44,8 +44,76 @@ function extractQuotedJson(text: string): unknown {
   const trimmed = text.trim();
   const quoteMatch = /^(['"`])([\s\S]*)\1$/.exec(trimmed);
   if (!quoteMatch) throw new Error('Not a quoted string');
-  const inner = quoteMatch[2].replace(/\\(['"\\])/g, '$1');
-  return JSON.parse(inner);
+  return JSON.parse(unescapeJsString(quoteMatch[2]));
+}
+
+const SIMPLE_ESCAPES: Record<string, string> = {
+  n: '\n',
+  r: '\r',
+  t: '\t',
+  b: '\b',
+  f: '\f',
+  v: '\v',
+};
+
+// Decodes the escape sequences of a JS string literal body (without quotes).
+export function unescapeJsString(body: string): string {
+  let out = '';
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (ch !== '\\') {
+      out += ch;
+      continue;
+    }
+    const next = body[++i];
+    if (next === undefined) throw new Error('Unterminated escape sequence');
+    if (next in SIMPLE_ESCAPES) {
+      out += SIMPLE_ESCAPES[next];
+    } else if (next === '0' && !/[0-9]/.test(body[i + 1] ?? '')) {
+      out += '\0';
+    } else if (next === 'x') {
+      const hex = body.slice(i + 1, i + 3);
+      if (!/^[0-9a-fA-F]{2}$/.test(hex)) throw new Error('Invalid \\x escape');
+      out += String.fromCharCode(parseInt(hex, 16));
+      i += 2;
+    } else if (next === 'u' && body[i + 1] === '{') {
+      const close = body.indexOf('}', i + 2);
+      const hex = close === -1 ? '' : body.slice(i + 2, close);
+      if (!/^[0-9a-fA-F]{1,6}$/.test(hex)) throw new Error('Invalid \\u{} escape');
+      out += String.fromCodePoint(parseInt(hex, 16));
+      i = close;
+    } else if (next === 'u') {
+      const hex = body.slice(i + 1, i + 5);
+      if (!/^[0-9a-fA-F]{4}$/.test(hex)) throw new Error('Invalid \\u escape');
+      out += String.fromCharCode(parseInt(hex, 16));
+      i += 4;
+    } else if (next === '\r') {
+      // Line continuation (\r\n or \r): produces nothing.
+      if (body[i + 1] === '\n') i++;
+    } else if (next === '\n' || next === '\u2028' || next === '\u2029') {
+      // Line continuation: produces nothing.
+    } else {
+      // \' \" \` \\ and any other identity escape.
+      out += next;
+    }
+  }
+  return out;
+}
+
+// Parses text as JSON. When the result is a string that itself holds a JSON
+// object or array (e.g. a double-quoted, escaped JSON literal copied from code
+// or logs), the inner value is returned instead.
+function parseDirect(text: string): unknown {
+  const value: unknown = JSON.parse(text);
+  if (typeof value === 'string') {
+    try {
+      const inner: unknown = JSON.parse(value);
+      if (inner !== null && typeof inner === 'object') return inner;
+    } catch {
+      // not nested JSON; keep the plain string
+    }
+  }
+  return value;
 }
 
 function tryStrategy(fn: () => unknown): ViewState | null {
@@ -61,7 +129,7 @@ export function parseJson(text: string): ViewState {
 
   const trimmed = text.trim();
   return (
-    tryStrategy(() => JSON.parse(trimmed)) ??
+    tryStrategy(() => parseDirect(trimmed)) ??
     tryStrategy(() => extractQuotedJson(trimmed)) ??
     tryStrategy(() => extractEmbeddedJson(text)) ?? {
       kind: 'error',

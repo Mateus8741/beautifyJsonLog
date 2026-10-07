@@ -1,7 +1,8 @@
 // src/terminal/logger.ts
-import { RenderNode, Plugin, Transport } from '../core/types';
+import type { RenderNode, Plugin, Transport } from '../core/types';
 import { buildTree } from '../core/builder';
-import { formatTree, FormatOptions } from './formatter';
+import { formatTree } from './formatter';
+import type { FormatOptions } from './formatter';
 import { ansi } from './ansi';
 
 export interface LoggerOptions extends FormatOptions {
@@ -30,6 +31,6 @@ export function BeautifyJsonLog(
   transport(`${header}\n${formatted}`);
 }
 
-const defaultTransport: Transport = output => {
+const defaultTransport: Transport = (output) => {
   console.log(output);
 };

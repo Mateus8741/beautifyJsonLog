@@ -1,5 +1,5 @@
 // src/terminal/formatter.ts
-import { RenderNode, PrimitiveNode, AnsiTheme } from '../core/types';
+import type { RenderNode, PrimitiveNode, AnsiTheme } from '../core/types';
 import { defaultAnsiTheme } from './ansi';
 
 export interface FormatOptions {

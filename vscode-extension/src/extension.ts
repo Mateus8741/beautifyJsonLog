@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
       if (!text.trim()) {
         vscode.window.showWarningMessage(
-          'Beautify JSON Log: select some JSON text first.'
+          'Beautify JSON Log: No JSON text found in the selection or document.'
         );
         return;
       }

@@ -1,9 +1,11 @@
-src/**
-node_modules/**
-coverage/**
-esbuild.js
-tsconfig.json
-*.test.*
-**/*.map
-.vscode/launch.json
-.vscode/tasks.json
+# Ship only the bundled extension + listing files.
+# Kept: dist/extension.js, dist/webview.js, dist/webview.html,
+#       package.json, README.md, CHANGELOG.md, LICENSE
+**
+!dist/extension.js
+!dist/webview.js
+!dist/webview.html
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
