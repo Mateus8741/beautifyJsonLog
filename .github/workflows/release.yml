@@ -32,10 +32,6 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
 
-      # Trusted publishing requires npm >= 11.5.1
-      - name: Update npm
-        run: npm install -g npm@latest && npm --version
-
       - name: Install dependencies
         run: npm ci
 
@@ -85,6 +81,12 @@ jobs:
       - name: Build
         if: steps.check.outputs.exists != 'true'
         run: npm run build
+
+      # Trusted publishing requires npm >= 11.5.1. Upgrade only right before
+      # publishing so a newer npm can't break dependency installation.
+      - name: Update npm
+        if: steps.check.outputs.exists != 'true'
+        run: npm install -g npm@latest && npm --version
 
       - name: Publish to npm
         if: steps.check.outputs.exists != 'true'
