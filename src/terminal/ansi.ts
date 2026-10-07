@@ -1,5 +1,5 @@
 // src/terminal/ansi.ts
-import { AnsiTheme } from '../core/types';
+import type { AnsiTheme } from '../core/types';
 
 const c = (code: string) => (s: string) => `\x1b[${code}m${s}\x1b[0m`;
 

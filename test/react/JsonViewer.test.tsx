@@ -1,8 +1,9 @@
+// @vitest-environment jsdom
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { JsonViewer } from '../../src/react/JsonViewer';
 import * as builder from '../../src/core/builder';
-import { RenderNode } from '../../src/core/types';
+import type { RenderNode } from '../../src/core/types';
 
 describe('<JsonViewer>', () => {
   test('renders a string value', () => {
@@ -43,11 +44,11 @@ describe('<JsonViewer>', () => {
       <JsonViewer
         value={{ secret: 'password' }}
         plugins={[
-          node => {
+          (node) => {
             if (node.kind !== 'object') return node;
             return {
               ...node,
-              entries: node.entries.map(e =>
+              entries: node.entries.map((e) =>
                 e.key === 'secret'
                   ? {
                       key: e.key,
@@ -107,7 +108,7 @@ describe('<JsonViewer>', () => {
   });
 
   test('renders Map entries with duplicate key labels without React key warnings', () => {
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       const one: RenderNode = {
         kind: 'primitive',
@@ -144,7 +145,7 @@ describe('<JsonViewer>', () => {
   });
 
   test('does not rebuild the tree on re-render when plugins prop is omitted', () => {
-    const spy = jest.spyOn(builder, 'buildTree');
+    const spy = vi.spyOn(builder, 'buildTree');
     try {
       const value = { a: 1 };
       const { rerender } = render(<JsonViewer value={value} />);

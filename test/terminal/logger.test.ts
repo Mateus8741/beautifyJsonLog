@@ -7,7 +7,11 @@ function strip(s: string): string {
 describe('BeautifyJsonLog', () => {
   test('calls transport once with title and value', () => {
     const outputs: string[] = [];
-    BeautifyJsonLog('My Title', { a: 1 }, { transport: s => outputs.push(s) });
+    BeautifyJsonLog(
+      'My Title',
+      { a: 1 },
+      { transport: (s) => outputs.push(s) }
+    );
     expect(outputs).toHaveLength(1);
     const out = strip(outputs[0]!);
     expect(out).toContain('🔍 My Title');
@@ -16,7 +20,7 @@ describe('BeautifyJsonLog', () => {
   });
 
   test('uses console.log when no transport given', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
     BeautifyJsonLog('Test', { x: 2 });
     expect(spy).toHaveBeenCalledTimes(1);
     spy.mockRestore();
@@ -28,13 +32,13 @@ describe('BeautifyJsonLog', () => {
       'Test',
       { secret: 'password123' },
       {
-        transport: s => outputs.push(s),
+        transport: (s) => outputs.push(s),
         plugins: [
-          node => {
+          (node) => {
             if (node.kind !== 'object') return node;
             return {
               ...node,
-              entries: node.entries.map(e =>
+              entries: node.entries.map((e) =>
                 e.key === 'secret'
                   ? {
                       key: e.key,
@@ -61,7 +65,7 @@ describe('BeautifyJsonLog', () => {
     BeautifyJsonLog('Test', [1, 2], {
       transport: () => {},
       plugins: [
-        node => {
+        (node) => {
           received.push(node.kind);
           return node;
         },
@@ -75,7 +79,7 @@ describe('BeautifyJsonLog', () => {
     BeautifyJsonLog(
       'Test',
       { a: 1 },
-      { transport: s => outputs.push(s), indent: 4 }
+      { transport: (s) => outputs.push(s), indent: 4 }
     );
     expect(strip(outputs[0]!)).toContain('    "a"');
   });

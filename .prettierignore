@@ -1,0 +1,13 @@
+dist
+node_modules
+coverage
+beautify-json-log
+vscode-extension
+.github
+.claude
+.cursor
+example
+docs
+bun.lock
+package-lock.json
+*.vsix

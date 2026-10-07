@@ -1,6 +1,6 @@
 // src/react/JsonNode.tsx
 import React from 'react';
-import { RenderNode, CssTheme } from '../core/types';
+import type { RenderNode, CssTheme } from '../core/types';
 
 interface JsonNodeProps {
   node: RenderNode;
@@ -36,7 +36,6 @@ export function JsonNode({
           <span style={{ color: theme.bracket }}>[</span>
           <div style={{ paddingLeft: indent }}>
             {node.items.map((item, i) => (
-              // eslint-disable-next-line react/no-array-index-key
               <div key={i}>
                 <JsonNode
                   node={item}
@@ -101,7 +100,6 @@ export function JsonNode({
             <span style={{ color: theme.bracket }}>(</span>
             <div style={{ paddingLeft: indent }}>
               {items.map((item, i) => (
-                // eslint-disable-next-line react/no-array-index-key
                 <div key={i}>
                   <JsonNode
                     node={item}
@@ -136,7 +134,6 @@ export function JsonNode({
             <span style={{ color: theme.bracket }}>(</span>
             <div style={{ paddingLeft: indent }}>
               {entries.map(({ key, value }, i) => (
-                // eslint-disable-next-line react/no-array-index-key
                 <div key={i}>
                   <span style={{ color: theme.key }}>
                     {JSON.stringify(key)}
